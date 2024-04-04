@@ -8,29 +8,27 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 )
 
 func HandleProxy(w http.ResponseWriter, r *http.Request) {
-    path := r.URL.Path
-    uid := strings.TrimPrefix(path, "/")
+    uid := r.Header.Get("XXX-POL-UID")
 
     // uid 유효성 검사
-    // if !isValidUid(uid) {
-    //     log.Printf("Invalid uid: %s", uid)
-    //     http.Error(w, "Invalid uid", http.StatusBadRequest)
-    //     return
-    // }
+    if !isValidUid(uid) {
+        log.Printf("Invalid uid: %s", uid)
+        http.Error(w, "Invalid uid", http.StatusBadRequest)
+        return
+    }
 
-    // uidInt, _ := strconv.Atoi(uid)
+	// 프록시 경로 설정
     targetURL := fmt.Sprintf("http://svc-%s.default.cluster.local", uid)
-	log.Println(targetURL)
     target, err := url.Parse(targetURL)
     if err != nil {
         log.Println(err)
         http.Error(w, "Internal Server Error", http.StatusInternalServerError)
         return
     }
+	log.Println(targetURL)
 
     proxy := httputil.NewSingleHostReverseProxy(target)
 
@@ -55,13 +53,9 @@ func HandleProxy(w http.ResponseWriter, r *http.Request) {
     proxy.ServeHTTP(w, r)
 }
 
-// func isValidUid(uid string) bool {
-//     uidInt, err := strconv.Atoi(uid)
-//     if err != nil {
-//         return false
-//     }
-//     return uidInt >= 10000 && uidInt <= 30000
-// }
+func isValidUid(uid string) bool {
+    return uid != ""
+}
 
 func modifyResponse(resp *http.Response) error {
     if resp.Header.Get("Upgrade") == "websocket" {
