@@ -67,4 +67,4 @@ jobs:
 
             - name: Deploy to GKE
               run: |
-                  kubectl set image deployment/pol-proxy pol-proxy=${{ secrets.DOCKERHUB_ORGANIZATIONS }}/pol-proxy:${{ github.sha }}
+                  kubectl set image deployment/pol-proxy pol-proxy=${{ secrets.DOCKERHUB_ORGNIZATIONS }}/pol-proxy:${{ github.sha }}
