@@ -24,6 +24,7 @@ func HandleProxy(w http.ResponseWriter, r *http.Request) {
 
     // uidInt, _ := strconv.Atoi(uid)
     targetURL := fmt.Sprintf("http://svc-%s.default.cluster.local", uid)
+	log.Println(targetURL)
     target, err := url.Parse(targetURL)
     if err != nil {
         log.Println(err)
