@@ -1,0 +1,64 @@
+name: Go Server CI/CD For Merge
+
+on:
+    push:
+        branches: master
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v3
+            - name: Set up Go
+              uses: actions/setup-go@v3
+              with:
+                  go-version: "1.22"
+            - name: Cache Go modules
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ~/go/pkg/mod
+                      ~/go/bin
+                  key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+                  restore-keys: |
+                      ${{ runner.os }}-go-
+            - name: Build Go application
+              run: go build -v -o ingress-router ./internal/proxy
+            - name: Build Docker image
+              run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_ORGANIZATIONS }}/ingress-router:${{ github.sha }}
+            - name: Login to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - name: Push Docker image
+              run: docker push ${{ secrets.DOCKERHUB_ORGANIZATIONS }}/ingress-router:${{ github.sha }}
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Authenticate to Google Cloud
+              uses: google-github-actions/auth@v2
+              with:
+                  credentials_json: ${{ secrets.GKE_SA_KEY }}
+
+            - name: Setup Cloud SDK
+              uses: google-github-actions/setup-gcloud@v2
+
+            - name: Install gke-gcloud-auth-plugin
+              run: gcloud components install gke-gcloud-auth-plugin
+
+            - name: Configure Docker for GKE
+              run: gcloud auth configure-docker --quiet
+
+            - name: Get GKE credentials
+              run: |
+                  gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GKE_PROJECT }}
+
+            - name: Deploy to GKE
+              run: |
+                  kubectl set image deployment/ingress-router ingress-router=${{ secrets.DOCKERHUB_ORGANIZATIONS }}/ingress-router:${{ github.sha }}
