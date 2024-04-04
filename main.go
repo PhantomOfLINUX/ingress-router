@@ -8,10 +8,8 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		go proxy.HandleProxy(w, r)
-	})
+    http.HandleFunc("/", proxy.HandleProxy)
 
-	log.Println("Proxy server is running on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Println("Proxy server is running on :8080")
+    log.Fatal(http.ListenAndServe(":8080", nil))
 }
