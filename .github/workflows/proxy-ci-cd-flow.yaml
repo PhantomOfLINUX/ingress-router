@@ -39,7 +39,7 @@ jobs:
                   password: ${{ secrets.DOCKERHUB_TOKEN }}
 
             - name: Push Docker image
-              run: docker push ${{ secrets.DOCKERHUB_ORGANIZATIONS }}/pol-proxy:${{ github.sha }}
+              run: docker push ${{ secrets.DOCKERHUB_ORGNIZATIONS }}/pol-proxy:${{ github.sha }}
 
     deploy:
         needs: build
