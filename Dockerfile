@@ -7,12 +7,12 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -v -o ingress-router main.go
+RUN go build -v -o pol-proxy ./
 
 FROM gcr.io/distroless/base-debian10
 
 WORKDIR /
 
-COPY --from=builder /app/ingress-router /ingress-router
+COPY --from=builder /app/pol-proxy /pol-proxy
 
-CMD ["/ingress-router"]
+CMD ["./pol-proxy"]
