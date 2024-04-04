@@ -10,10 +10,12 @@ jobs:
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
+
             - name: Set up Go
               uses: actions/setup-go@v3
               with:
                   go-version: "1.22"
+
             - name: Cache Go modules
               uses: actions/cache@v3
               with:
@@ -23,15 +25,19 @@ jobs:
                   key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
                   restore-keys: |
                       ${{ runner.os }}-go-
+
             - name: Build Go application
               run: go build -v -o ingress-router ./internal/proxy
+
             - name: Build Docker image
               run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_ORGANIZATIONS }}/ingress-router:${{ github.sha }}
+
             - name: Login to Docker Hub
               uses: docker/login-action@v3
               with:
                   username: ${{ secrets.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN }}
+
             - name: Push Docker image
               run: docker push ${{ secrets.DOCKERHUB_ORGANIZATIONS }}/ingress-router:${{ github.sha }}
 

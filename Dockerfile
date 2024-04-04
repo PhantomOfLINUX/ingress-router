@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -v -o ingress-router ./internal/proxy
+RUN go build -v -o ingress-router main.go
 
 FROM gcr.io/distroless/base-debian10
 
