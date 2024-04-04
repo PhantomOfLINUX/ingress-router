@@ -11,7 +11,7 @@ import (
 )
 
 func HandleProxy(w http.ResponseWriter, r *http.Request) {
-    uid := r.Header.Get("XXX-POL-UID")
+    uid := r.Header.Get("X-POL-UID")
 
     // uid 유효성 검사
     if !isValidUid(uid) {
@@ -21,7 +21,7 @@ func HandleProxy(w http.ResponseWriter, r *http.Request) {
     }
 
 	// 프록시 경로 설정
-    targetURL := fmt.Sprintf("http://svc-%s.default.cluster.local", uid)
+    targetURL := fmt.Sprintf("http://svc-%s.default.svc.cluster.local:8080", uid)
     target, err := url.Parse(targetURL)
     if err != nil {
         log.Println(err)
