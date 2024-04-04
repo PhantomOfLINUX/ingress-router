@@ -10,25 +10,28 @@ import (
 	"net/url"
 )
 
+const dnsFormat = "http://%s-svc-%s.default.svc.cluster.local:8080"
+
 func HandleProxy(w http.ResponseWriter, r *http.Request) {
     uid := r.Header.Get("X-POL-UID")
+	stage := r.Header.Get("X-POL-STAGE")
 
     // uid 유효성 검사
-    if !isValidUid(uid) {
-        log.Printf("Invalid uid: %s", uid)
-        http.Error(w, "Invalid uid", http.StatusBadRequest)
+    if !isValidHeader(uid) || !isValidHeader(stage) {
+        log.Printf("Invalid headers: %s %s", uid, stage)
+        http.Error(w, "Invalid Headers", http.StatusBadRequest)
         return
     }
 
 	// 프록시 경로 설정
-    targetURL := fmt.Sprintf("http://svc-%s.default.svc.cluster.local:8080", uid)
+    targetURL := fmt.Sprintf(dnsFormat, stage, uid)
     target, err := url.Parse(targetURL)
     if err != nil {
         log.Println(err)
         http.Error(w, "Internal Server Error", http.StatusInternalServerError)
         return
     }
-	log.Println(targetURL)
+	log.Println("targetURL" + targetURL)
 
     proxy := httputil.NewSingleHostReverseProxy(target)
 
@@ -53,8 +56,8 @@ func HandleProxy(w http.ResponseWriter, r *http.Request) {
     proxy.ServeHTTP(w, r)
 }
 
-func isValidUid(uid string) bool {
-    return uid != ""
+func isValidHeader(value string) bool {
+    return value != ""
 }
 
 func modifyResponse(resp *http.Response) error {
