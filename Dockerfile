@@ -7,9 +7,11 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -v -o pol-proxy ./
+# 정적 링크된 바이너리 생성
+RUN CGO_ENABLED=0 go build -v -tags netgo -ldflags '-extldflags "-static"' -o pol-proxy ./
 
-FROM gcr.io/distroless/base-debian10
+# Distroless static 이미지 사용
+FROM gcr.io/distroless/static
 
 WORKDIR /
 
