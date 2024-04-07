@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/PhantomOfLINUX/ingress-router/internal/proxy"
+	"github.com/PhantomOfLINUX/ingressRouter/internal/proxy"
 )
 
 func main() {

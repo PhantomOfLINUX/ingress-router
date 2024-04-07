@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+
+	"github.com/PhantomOfLINUX/ingressRouter/internal/model"
 )
 
 const dnsFormat = "http://%s-svc-%s.default.svc.cluster.local:8080"

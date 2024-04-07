@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ingress-router.iml" filepath="$PROJECT_DIR$/ingress-router.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ingress-router.iml" filepath="$PROJECT_DIR$/ingressRouter.iml" />
     </modules>
   </component>
 </project>
