@@ -8,24 +8,23 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-
-	"github.com/PhantomOfLINUX/ingressRouter/internal/model"
 )
 
 const dnsFormat = "http://%s-svc-%s.default.svc.cluster.local:8080"
 
 func HandleProxy(w http.ResponseWriter, r *http.Request) {
-    uid := r.Header.Get("X-POL-UID")
-	stage := r.Header.Get("X-POL-STAGE")
+    queryParams := r.URL.Query()
+    uid := queryParams.Get("uid")
+    stage := queryParams.Get("stage")
 
     // uid 유효성 검사
-    if !isValidHeader(uid) || !isValidHeader(stage) {
-        log.Printf("Invalid headers: %s %s", uid, stage)
-        http.Error(w, "Invalid Headers", http.StatusBadRequest)
+    if !isValidParam(uid) || !isValidParam(stage) {
+        log.Printf("Invalid query parameters: uid=%s, stage=%s", uid, stage)
+        http.Error(w, "Invalid Query Parameters", http.StatusBadRequest)
         return
     }
 
-	// 프록시 경로 설정
+    // 프록시 경로 설정
     targetURL := fmt.Sprintf(dnsFormat, stage, uid)
     target, err := url.Parse(targetURL)
     if err != nil {
@@ -33,7 +32,7 @@ func HandleProxy(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Internal Server Error", http.StatusInternalServerError)
         return
     }
-	log.Println("targetURL" + targetURL)
+    log.Println("targetURL: " + targetURL)
 
     proxy := httputil.NewSingleHostReverseProxy(target)
 
@@ -58,7 +57,7 @@ func HandleProxy(w http.ResponseWriter, r *http.Request) {
     proxy.ServeHTTP(w, r)
 }
 
-func isValidHeader(value string) bool {
+func isValidParam(value string) bool {
     return value != ""
 }
 
