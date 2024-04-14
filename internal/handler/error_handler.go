@@ -8,30 +8,21 @@ import (
 	"github.com/PhantomOfLINUX/ingressRouter/internal/model"
 )
 
-func RespondWithError(w http.ResponseWriter, errorResponse model.ErrorResponse) {
-    response, err := json.Marshal(errorResponse)
-    if err != nil {
-        log.Printf("Error marshaling JSON response: %v", err)
-        RespondWithInternalServerError(w)
-        return
-    }
+func RespondWithError(w http.ResponseWriter, statusCode int, response, errorCode, details string) {
+	errorResponse := model.ErrorResponse{
+		Response: response,
+		Error:    errorCode,
+		Details:  details,
+	}
 
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(errorResponse.StatusCode)
-    w.Write(response)
-}
+	jsonResponse, err := json.Marshal(errorResponse)
+	if err != nil {
+		log.Printf("Error marshaling JSON response: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
-func RespondWithInternalServerError(w http.ResponseWriter) {
-    errorResponse := model.ErrorResponse{
-        Response:   "error",
-        Details:    "Internal Server Error",
-        Error:      http.StatusText(http.StatusInternalServerError),
-        StatusCode: http.StatusInternalServerError,
-    }
-
-    response, _ := json.Marshal(errorResponse)
-
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusInternalServerError)
-    w.Write(response)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	w.Write(jsonResponse)
 }
