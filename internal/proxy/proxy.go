@@ -12,7 +12,7 @@ import (
 	"github.com/PhantomOfLINUX/ingressRouter/internal/handler"
 )
 
-const dnsFormat = "http://%s-svc-%s.default.svc.cluster.local:8080"
+const dnsFormat = "http://%s-%s.default.svc.cluster.local:8080"
 
 func HandleProxy(w http.ResponseWriter, r *http.Request) {
     queryParams := r.URL.Query()
